@@ -10,7 +10,16 @@
     <button type="submit" class="btn btn-block btn-primary" disabled="@IsSubmit">
         @BtnLabel
     </button>
+    
+    <ValidationSummary />
 </EditForm>
+
+@if (IsSubmit && !string.IsNullOrWhiteSpace(SuccessMessage))
+{
+    <p class="mt-2 text-@(IsSuccess == true ? "success" : "danger")">
+        @SuccessMessage
+    </p>
+}
 
 @code {
     [Parameter]
@@ -24,6 +33,7 @@
 
     private bool IsSubmit { get; set; }
     private bool? IsSuccess { get; set; }
+    private string? SuccessMessage { get; set; }
 
     private CreateNewsletterSubscriberRequest _subscriptionModel = new();
 
@@ -35,12 +45,15 @@
         {
             IsSuccess = await Provider.CreateNewsletterSubscriber(_subscriptionModel);
             
+            SuccessMessage = IsSuccess == true ? "Welcome to the club!" : "Oops, could not subscribe at this time.";
+            
             // Re-fetch on success.
             await Provider.InitNewsletterSubscribers(IsSuccess);
         }
         
         await OnSubmit.InvokeAsync(_subscriptionModel);
-        ResetForm();
+
+        Task.Delay(2000).ContinueWith(_ => ResetForm());
     }
 
     private void ResetForm()
@@ -49,5 +62,6 @@
         
         IsSubmit = false;
         IsSuccess = false;
+        SuccessMessage = null;
     }
 }
