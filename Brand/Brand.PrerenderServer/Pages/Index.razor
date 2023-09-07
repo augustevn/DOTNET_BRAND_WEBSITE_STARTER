@@ -1,0 +1,47 @@
+﻿@page "/"
+
+@inject CreateNewsletterSubscriberCommand Command
+@inject GetNewsletterSubscribersQuery Query
+
+<PageTitle>Index</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div class="mt-4">
+                <CreateNewsletterSubscriberForm OnSubmit="CreateNewsletterSubscriber"/>
+            </div>
+            
+            @if (Subscribers?.Count() > 0)
+            {
+                <div class="mt-4">
+                    <h3>Email list</h3>
+                    <NewsletterSubscribersList StoredSubscribers="@Subscribers"/>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<NewsletterSubscriberResponse>? Subscribers { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetNewsletterSubscribers();
+    }
+
+    private async Task CreateNewsletterSubscriber(object args)
+    {
+        var request = (CreateNewsletterSubscriberRequest)args;
+        await Command.Handle(request);
+
+        // Re-fetch
+        await GetNewsletterSubscribers();
+    }
+
+    private async Task GetNewsletterSubscribers()
+    {
+        Subscribers = await Query.Handle();
+    }
+}

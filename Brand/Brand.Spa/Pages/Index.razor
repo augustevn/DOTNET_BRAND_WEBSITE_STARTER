@@ -1,0 +1,23 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div class="mt-4">
+                <CreateNewsletterSubscriberForm IsHttpRequest="true" OnSubmit="() => ForceFetch = true" />
+            </div>
+            
+            <div class="mt-4">
+                <h3>Email list</h3>
+                <NewsletterSubscribersList IsHttpRequest="true" ForceFetch="@ForceFetch"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    private bool ForceFetch { get; set; }
+}

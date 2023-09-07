@@ -1,0 +1,53 @@
+﻿@inject NewsletterSubscriberProvider Provider
+
+<EditForm Model="@_subscriptionModel" OnValidSubmit="HandleSubscriptionForm">
+    <FluentValidationValidator />
+    
+    <div class="form-group">
+        <InputText type="email" class="form-control" placeholder="Email address" @bind-Value="_subscriptionModel.Email"/>
+    </div>
+    
+    <button type="submit" class="btn btn-block btn-primary" disabled="@IsSubmit">
+        @BtnLabel
+    </button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public bool IsHttpRequest { get; set; }
+
+    [Parameter]
+    public string? BtnLabel { get; set; } = "Join";
+    
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private bool IsSubmit { get; set; }
+    private bool? IsSuccess { get; set; }
+
+    private CreateNewsletterSubscriberRequest _subscriptionModel = new();
+
+    private async Task HandleSubscriptionForm()
+    {
+        IsSubmit = true;
+
+        if (IsHttpRequest)
+        {
+            IsSuccess = await Provider.CreateNewsletterSubscriber(_subscriptionModel);
+            
+            // Re-fetch on success.
+            await Provider.InitNewsletterSubscribers(IsSuccess);
+        }
+        
+        await OnSubmit.InvokeAsync(_subscriptionModel);
+        ResetForm();
+    }
+
+    private void ResetForm()
+    {
+        _subscriptionModel = new CreateNewsletterSubscriberRequest();
+        
+        IsSubmit = false;
+        IsSuccess = false;
+    }
+}
